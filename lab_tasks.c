@@ -175,23 +175,47 @@ BIGNUM* encryptUsingRSA(BIGNUM* message, BIGNUM* modulo, BIGNUM* public_key)
 
     /* Now we just need to encrypt the message */
     BIGNUM* signature = BN_new();
-    signature = encryptUsingRSA(signature, private_key, public_key);
+    signature = encryptUsingRSA(message_to_sign, private_key, public_key);
     printBN("Signature for I owe you $2000. is: ", signature);
 
     /* Change the message slightly to see what happens */
     /* python -c 'print("I owe you $3000.".encode("hex"))' is the command to run */
     BIGNUM* message_to_sign2 = BN_new();
-    BN_hex2bn(&message_to_sign2, "49206f776520796f752024333030302e")
+    BN_hex2bn(&message_to_sign2, "49206f776520796f752024333030302e");
 
     /*As before we encrypt the message as a signature */
     BIGNUM* signature2 = BN_new();
-    signature2 = encryptUsingRSA(signature2, private_key, public_key);
+    signature2 = encryptUsingRSA(message_to_sign2, private_key, public_key);
     printBN("Signature for I owe you $3000. is: ", signature2);
  }
 
  void task5()
  {
+    /* To verify the signature we need to decrypt it using the public key */
+    /* Setup the signature, keys, and modulo */
+    BIGNUM* signature_to_verify = BN_new();
+    BIGNUM* public_key = BN_new();
+    BIGNUM* message = BN_new();
+    BIGNUM* modulo = BN_new();
+    BN_hex2bn(&signature_to_verify, "643D6F34902D9C7EC90CB0B2BCA36C47FA37165C0005CAB026C0542CBDB6802F");
+    BN_hex2bn(&public_key, "AE1CD4DC432798D933779FBD46C6E1247F0CF1233595113AA51B450F18116115");
+    BN_hex2bn(&message, "4c61756e63682061206d697373696c652e");
+    BN_hex2bn(&modulo, "010001");
 
+    /* Let's decrypt and verify the signature */
+    BIGNUM* check_result = BN_new();
+    check_result = decryptUsingRSA(signature_to_verify, modulo, public_key);
+    printf("%s", "The message is: ");
+    printHX(BN_bn2hex(check_result));
+    printf("\n");
+
+    /* Let's corrupt the signature by changing the last byte to 3F */
+    printf("%s\n","--- Corrupted signature ---" );
+    BN_hex2bn(&signature_to_verify, "643D6F34902D9C7EC90CB0B2BCA36C47FA37165C0005CAB026C0542CBDB6803F");
+    check_result = decryptUsingRSA(signature_to_verify, modulo, public_key);
+    printf("%s", "The message from the corrupted signature is: " );
+    printHX(BN_bn2hex(check_result));
+    printf("\n");
  }
 
  void task6()
@@ -204,14 +228,19 @@ int main()
 {
    printf("%s\n", "Task 1 - Deriving the Private Key");
    task1();
+   printf("\n");
    printf("%s\n", "Task 2 - Encrypting a Message");
    task2();
+   printf("\n");
    printf("%s\n", "Task 3 - Decrypting a Message");
    task3();
+   printf("\n");
    printf("%s\n", "Task 4 - Signing a Message");
    task4();
+   printf("\n");
    printf("%s\n", "Task 5 - Verifying a Signature");
-   //task5();
+   task5();
+   printf("\n");
    printf("%s\n", "Task 6 - Manually Verifying an X509 Certificate");
    //task6();
 
