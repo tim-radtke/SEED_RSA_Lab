@@ -220,8 +220,28 @@ BIGNUM* encryptUsingRSA(BIGNUM* message, BIGNUM* modulo, BIGNUM* public_key)
 
  void task6()
  {
+    /* setup the public key and modulus for the certificate */
+    /* The example site being used is apple.com */
+    BIGNUM* public_key = BN_new();
+    BIGNUM* modulo = BN_new();
+    BN_hex2bn(&public_key, "ACE894257B536C98682E3C9DABE603176CAE72164808824498C4FA3DBE02621C8F75CDC6D8564AED5CB6ADE2CC672218461052C78E14CB01C7C315F5D3BB997A265A8E54F1B4EA30A055DB75D6D2424E378137839E6BF0E7CE353C956CF2DE047604FB1C7B92ABE3887225277A4D3811278CC09D5F34E750C34FBC031187C2FC1359435CF1CA33DB3FEA6A0CDE0B2EE0D173F8C3E6A3A8A4B70C4BD738494D4EF7B7DAE9ACC26E9791F26419741B3FDF76B55FF419AED517178CA468BD0BACC56DA91FA0B4F0C3383CB116E3CAA8156359085337A5B0D066E0BB173D9BA4327DFB22B3459131336A2248048D535D186E018D9BAEF1524C118F679B9E65EB06CB");
+    BN_hex2bn(&modulo, "10001");
 
- }
+    /* Setup the signature */
+    BIGNUM* signature = BN_new();
+    BN_hex2bn(&signature, "22c083a8416468dcda6def0746323257259efe5d434bf217c25f1e86e4ac543b3be996df92e20d8fd9205f4a04b198e5e3ad1d2617f3e2adb756dc462970abd5638a9f3402d6f85a9ceaf6d33acc5c7ea31546bf562c3967428abf78f37f2d3f477420baa8caa51656ee87832241bb764400169265c231e138c9f4b84eb73c8ee3899c1ea80d5e203b21d2b74cfb37f62026571dfedcf426c236c61a32a0474ace448194b826ba615a91d1a775c161b8336e0781347ff9de340b824d558dc5169b54bc20b0e320f927393676e16c0260bd6d9c694dbcdc868390216dc212df2152aba2a8106f3affbb608dc9acc1c1b0bb7d4f8e18622282f979059e1ef21bd1");
+
+    /* We also got the hash of the signature so once we decrypt the signature
+     * we can use this hash to verify that the signature is valid
+     */
+     BIGNUM* signature_decrypted = BN_new();
+     signature_decrypted = decryptUsingRSA(signature, modulo, public_key);
+
+     int masked = BN_mask_bits(signature_decrypted, 256);
+      printBN("Hash is: ", signature_decrypted);
+      printf("%s\n", "Compare to: eb1acf5b32775f0114adb8a14ff6ddf361e60b15fbde9e1407bb08f6caeb2be2");
+
+  }
 /* END TASK HELPER FUNCTIONS */
 
 int main()
@@ -242,7 +262,7 @@ int main()
    task5();
    printf("\n");
    printf("%s\n", "Task 6 - Manually Verifying an X509 Certificate");
-   //task6();
+   task6();
 
    return 1;
 }
